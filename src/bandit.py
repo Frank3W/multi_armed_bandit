@@ -8,6 +8,9 @@ class Bandit:
     def pull(self, k):
         raise NotImplementedError('Not implemented.')
 
+    def best_reward(self):
+        raise NotImplementedError('Not implemented.')
+
     def num_machines(self):
         raise NotImplementedError('Not implemented.')
 
@@ -46,6 +49,15 @@ class BernoulliBandit(Bandit):
             return 1
         else:
             return 0
+
+    def best_reward(self):
+        """Returns the best expected reward.
+
+        Return
+        ------
+            float
+        """
+        return max(self.means)
 
     def num_machines(self):
         """Gets number of the machines"""
