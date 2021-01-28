@@ -143,3 +143,48 @@ class IndEnv:
         regret_df_melt = regret_df.melt(id_vars=['step'], var_name='strategy', value_name='regret')
         chart_plot = alt.Chart(regret_df_melt).mark_line().encode(x='step:Q', y='regret:Q', color="strategy:N")
         return chart_plot
+
+    def altair_action_history(self, name):
+        """Gets altair chart of action history.
+
+        Parameters
+        ----------
+            name: string
+                strategy name
+
+        Return
+        ------
+            altair chart
+        """
+
+        if name not in self.result.keys():
+            raise Exception('Name must be one of {}'.format(list(self.result.keys())))
+
+        selection_list = self.result[name]['selection']
+
+        selection_matrix = np.zeros((len(selection_list), self.num_machines), dtype='int')
+
+        for idx, selection in enumerate(selection_list):
+            selection_matrix[idx, selection] = 1
+
+        selection_prop_dict = {}
+
+        for idx in range(selection_matrix.shape[1]):
+            selection_prop_dict['action {}'.format(idx)] = np.cumsum(selection_matrix[:, idx])/np.arange(1, selection_matrix.shape[0] + 1)
+
+
+        selection_prop_df = pd.DataFrame(selection_prop_dict)
+
+        # only around 100 points for chart
+        selected_indices = np.array(np.arange(0, selection_prop_df.shape[0], selection_prop_df.shape[0]//100))
+
+        # include last step
+        if selection_prop_df.shape[0] - 1 not in selected_indices:
+            selected_indices = np.append(selected_indices, selection_prop_df.shape[0]-1)
+        selection_prop_df = selection_prop_df.iloc[selected_indices]
+
+        selection_prop_df['step'] = selection_prop_df.index
+        selection_prop_df_melt = selection_prop_df.melt(id_vars=['step'], var_name='selection', value_name='proportion')
+
+        chart_plot = alt.Chart(selection_prop_df_melt).mark_line().encode(x='step:Q', y='proportion:Q', color='selection')
+        return chart_plot

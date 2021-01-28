@@ -45,6 +45,36 @@ class BaysianUCB:
             return int(np.argmax(utility_list))
 
 
+class ThompsonBeta:
+    """Thompson Sampling multi-armed bandit strategy by beta distribution.
+    """
+
+    def __init__(self, init_alpha=1, init_beta=1):
+        self.init_alpha = init_alpha
+        self.init_beta = init_beta
+
+    def strategy(self, history, config):
+        n_arms = config['num_machines']
+
+        if len(history['reward']) == 0:
+            return random.randrange(n_arms)
+        else:
+            alpha_list = [self.init_alpha] * n_arms
+            beta_list = [self.init_beta] * n_arms
+
+            for selection, reward in zip(history['selection'], history['reward']):
+                if reward not in [0, 1]:
+                    raise ValueError('reward must be 0 or 1: {}'.format(reward))
+
+                alpha_list[selection] += reward
+                beta_list[selection] += 1 - reward
+
+            # random samples from posterior beta distribution
+            random_samples = [beta.rvs(alpha_list[i], beta_list[i]) for i in range(n_arms)]
+
+            return int(np.argmax(random_samples))
+
+
 class UCB:
     """Upper Confidence Bound multi-armed bandit strategy.
     """
