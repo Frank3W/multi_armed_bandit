@@ -115,13 +115,21 @@ class EpsilonGreedy:
     """
     def __init__(self, epsilon):
         self.epsilon = epsilon
+        self.epsilon_is_callable = callable(self.epsilon)
 
     def strategy(self, history, config):
         if len(history['reward']) == 0:
             return random.randrange(config['num_machines'])
         else:
             rand_val = random.uniform(0, 1)
-            if rand_val < self.epsilon:
+
+            if self.epsilon_is_callable:
+                trial_cnt = len(history['reward'])
+                cur_epsilon = self.epsilon(trial_cnt)
+            else:
+                cur_epsilon = self.epsilon
+
+            if rand_val < cur_epsilon:
                 return random.randrange(config['num_machines'])
             else:
                 reward_dict = {}
@@ -149,6 +157,7 @@ class Softmax:
     """
     def __init__(self, tau=1):
         self.tau = tau
+        self.tau_is_callable = callable(self.tau)
 
     def strategy(self, history, config):
         if len(history['reward']) == 0:
@@ -169,10 +178,17 @@ class Softmax:
             for selection, reward_list in reward_dict.items():
                 reward_avg_dict[selection] = np.mean(reward_list)
 
-            exp_prob = [np.exp(1.0/self.tau)] * config['num_machines']
+            if self.tau_is_callable:
+                trial_cnt = len(history['reward'])
+                cur_tau = self.tau(trial_cnt)
+            else:
+                cur_tau = self.tau
+
+
+            exp_prob = [np.exp(1.0/cur_tau)] * config['num_machines']
 
             for selection, avg_reward in reward_avg_dict.items():
-                exp_prob[selection] = np.exp(avg_reward/self.tau)
+                exp_prob[selection] = np.exp(avg_reward/cur_tau)
 
             prob = np.array(exp_prob)/np.sum(exp_prob)
             cum_prob = np.cumsum(prob)
