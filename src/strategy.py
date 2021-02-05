@@ -143,3 +143,41 @@ class EpsilonGreedy:
 
                 best_selection = reward_avg_pair[0][0]
                 return best_selection
+
+class Softmax:
+    """Softmax multi-armed bandit strategy
+    """
+    def __init__(self, tau=1):
+        self.tau = tau
+
+    def strategy(self, history, config):
+        if len(history['reward']) == 0:
+            return random.randrange(config['num_machines'])
+        else:
+            reward_dict = {}
+            for i in range(len(history['reward'])):
+                reward = history['reward'][i]
+                selection = history['selection'][i]
+
+                if selection not in reward_dict:
+                    reward_dict[selection] = []
+
+                reward_dict[selection].append(reward)
+
+            reward_avg_dict = {}
+
+            for selection, reward_list in reward_dict.items():
+                reward_avg_dict[selection] = np.mean(reward_list)
+
+            exp_prob = [np.exp(1.0/self.tau)] * config['num_machines']
+
+            for selection, avg_reward in reward_avg_dict.items():
+                exp_prob[selection] = np.exp(avg_reward/self.tau)
+
+            prob = np.array(exp_prob)/np.sum(exp_prob)
+            cum_prob = np.cumsum(prob)
+
+            rand_val = random.uniform(0, 1)
+            for i in range(len(cum_prob)):
+                if cum_prob[i] >= rand_val:
+                    return i
