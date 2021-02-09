@@ -152,6 +152,7 @@ class EpsilonGreedy:
                 best_selection = reward_avg_pair[0][0]
                 return best_selection
 
+
 class Softmax:
     """Softmax multi-armed bandit strategy
     """
@@ -196,4 +197,38 @@ class Softmax:
             rand_val = random.uniform(0, 1)
             for i in range(len(cum_prob)):
                 if cum_prob[i] >= rand_val:
+                    return i
+
+
+class Exp3:
+    """Exponential-weighted strategy for exploration and exploitation
+    """
+    def __init__(self, gamma=0.1):
+        if gamma > 1 or gamma <= 0:
+            raise ValueError('gama must be in [0, 1]')
+        self.gamma = gamma
+        self.weights = None
+
+    def strategy(self, history, config):
+        num_arms = config['num_machines']
+        len_history = len(history['reward'])
+
+        if len_history == 0:
+            # initialize the weights
+            self.weights = np.ones(num_arms)
+            return random.randrange(num_arms)
+        else:
+            last_reward = history['reward'][-1]
+            last_selection = history['selection'][-1]
+
+            prev_prob = (1 - self.gamma) * (self.weights / np.sum(self.weights)) + self.gamma / num_arms
+
+            # update weights
+            self.weights[last_selection] = self.weights[last_selection] * np.exp(self.gamma * last_reward / (num_arms * prev_prob[last_selection]))
+
+            cur_prob = (1 - self.gamma) * (self.weights / np.sum(self.weights)) + self.gamma / num_arms
+            cum_cur_prob = np.cumsum(cur_prob)
+            rand_val = random.uniform(0, 1)
+            for i in range(len(cum_cur_prob)):
+                if cum_cur_prob[i] >= rand_val:
                     return i
