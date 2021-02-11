@@ -18,4 +18,4 @@ In addition, [enviroment](src/environment.py) provides functions to generate ana
 ![](doc/regret_chart.png)
 ![](doc/ucb_action_chart.png)
 
-The use of the framework is presented in [demo](demo.ipynb).
+The use of the framework is presented in [demo](demo.ipynb). The plot outputs in notebook may fail to render on Github. Alternatively, you can see notebook with renderred plots at [demo on nbviewer](https://nbviewer.jupyter.org/github/Frank3W/multi_armed_bandit/blob/main/demo.ipynb)
