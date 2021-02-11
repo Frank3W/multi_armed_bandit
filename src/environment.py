@@ -77,7 +77,7 @@ class IndEnv:
         self.result = history
 
 
-    def altair_chart_reward(self, names=None):
+    def altair_chart_reward(self, names=None, is_averaged=False):
         """Gets altair chart of reward.
 
         Parameters
@@ -93,6 +93,8 @@ class IndEnv:
         for strategy_name in self.result.keys():
             if names is None or strategy_name in names:
                 reward_dict[strategy_name] = np.cumsum(self.result[strategy_name]['reward'])
+                if is_averaged:
+                    reward_dict[strategy_name] = reward_dict[strategy_name]/np.arange(1, len(reward_dict[strategy_name])+1)
 
         reward_df = pd.DataFrame(reward_dict)
 
@@ -108,7 +110,7 @@ class IndEnv:
         return chart_plot
 
 
-    def altair_chart_regret(self, names=None):
+    def altair_chart_regret(self, names=None, is_averaged=False):
         """Gets altair chart of regret.
 
         Parameters
@@ -126,6 +128,8 @@ class IndEnv:
                 total_reward = np.cumsum(self.result[strategy_name]['reward'])
                 total_best_reward = np.cumsum(self.result[strategy_name]['best_reward'])
                 regret_dict[strategy_name] = total_best_reward  - total_reward
+                if is_averaged:
+                    regret_dict[strategy_name] = regret_dict[strategy_name]/np.arange(1, len(regret_dict[strategy_name])+1)
 
 
         regret_df = pd.DataFrame(regret_dict)
