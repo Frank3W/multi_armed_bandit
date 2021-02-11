@@ -7,6 +7,8 @@ This repo contains a simple framework to run multi-armed bandit algorithms with 
     - Upper Confidence Bound algorithm
     - Bayesian Upper Confidence Bound algorithm
     - Thompson Sampling algorithm
+    - Softmax algorithm
+    - Exp3 algorithm
 - [environment](src/environment.py) - create one-time run environment with a given bandit and multi-armed bandit algorithms.
 - [experiment](src/experiment.py) - multiple runs of a given environment.
 
