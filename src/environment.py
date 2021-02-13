@@ -37,6 +37,9 @@ class IndEnv:
 
 
     def run(self):
+        """Every run is fresh to completely replace previous results.
+        """
+
         if len(self.strategy) == 0:
             return
 
